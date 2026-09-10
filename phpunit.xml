@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+>
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory>tests/Feature</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>app</directory>
+        </include>
+    </source>
+    <php>
+        <!--
+            RefreshDatabase drops every table, so the suite must never reach a real
+            database. Two things are needed to guarantee that:
+
+            1. force="true", because PHPUnit otherwise leaves alone any variable that
+               already exists in the environment.
+            2. the matching <server> entries below, because Laravel's Env reader looks
+               at $_SERVER before $_ENV, and PHPUnit's <env> only writes $_ENV.
+
+            Tests\Feature\TestEnvironmentTest asserts the end result.
+        -->
+        <server name="APP_ENV" value="testing"/>
+        <server name="DB_CONNECTION" value="sqlite"/>
+        <server name="DB_DATABASE" value=":memory:"/>
+        <server name="DB_URL" value=""/>
+
+        <env name="APP_ENV" value="testing" force="true"/>
+        <!-- Fixed so that `php artisan test` works on a fresh clone, before any .env exists. -->
+        <env name="APP_KEY" value="base64:AckfSECXIvnK5r28GVIWUAxmbBSjTsmF/9nAKX/yPwc=" force="true"/>
+        <env name="APP_MAINTENANCE_DRIVER" value="file" force="true"/>
+        <env name="BCRYPT_ROUNDS" value="4" force="true"/>
+        <env name="BROADCAST_CONNECTION" value="null" force="true"/>
+        <env name="CACHE_STORE" value="array" force="true"/>
+        <env name="DB_CONNECTION" value="sqlite" force="true"/>
+        <env name="DB_DATABASE" value=":memory:" force="true"/>
+        <env name="DB_URL" value="" force="true"/>
+        <env name="MAIL_MAILER" value="array" force="true"/>
+        <env name="QUEUE_CONNECTION" value="sync" force="true"/>
+        <env name="SESSION_DRIVER" value="array" force="true"/>
+    </php>
+</phpunit>
