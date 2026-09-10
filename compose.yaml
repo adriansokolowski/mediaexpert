@@ -1,0 +1,36 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/var/www/html
+    # Application configuration deliberately lives in .env (the entrypoint creates it
+    # from .env.example) instead of being injected here. Process environment variables
+    # would otherwise outrank every other source when running the test suite inside
+    # this container, and `artisan serve` drops them from its child process anyway
+    # whenever a .env file exists.
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: scheduling
+      MYSQL_USER: scheduling
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      # Exposed on a non-default port so it cannot clash with a local MySQL.
+      - "33061:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  mysql-data:
