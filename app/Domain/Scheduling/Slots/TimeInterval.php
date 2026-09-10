@@ -37,12 +37,19 @@ final readonly class TimeInterval
      */
     public function on(CarbonImmutable $localDay): array
     {
-        $midnight = $localDay->startOfDay();
-
+        // setTime() rather than adding minutes to midnight: opening hours are
+        // wall-clock times, and on a DST transition day adding elapsed time
+        // would drift the boundary by the offset change (a 06:00 closing time
+        // would land on 07:00).
         return [
-            $midnight->addMinutes($this->startMinuteOfDay),
-            $midnight->addMinutes($this->endMinuteOfDay),
+            $this->at($localDay, $this->startMinuteOfDay),
+            $this->at($localDay, $this->endMinuteOfDay),
         ];
+    }
+
+    private function at(CarbonImmutable $localDay, int $minuteOfDay): CarbonImmutable
+    {
+        return $localDay->setTime(intdiv($minuteOfDay, 60), $minuteOfDay % 60);
     }
 
     private static function toMinutes(string $time): int
